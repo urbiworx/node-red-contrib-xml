@@ -1,7 +1,7 @@
 {
     "name"         : "node-red-contrib-xml",
     "version"      : "0.0.1",
-    "description"  : "Logic Nodes for smarthome requirements",
+    "description"  : "Advanced XML Node",
     "dependencies": {
     },
 	"repository": {

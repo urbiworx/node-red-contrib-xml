@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Urbiworx.
+ * Copyright 2015 Urbiworx.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@ exports.XML = function(){
 		aElement.$namespaces[aPrefix]=aNamespace;
 	}
 	this.addNamespace=addNamespace;
-	this.parseXML=function(aXML){
+	this.parseXML=function(aXML,aConfig){
+		var config=(typeof(aConfig)!=="undefined")?aConfig:{};
+		var autoinline=(typeof(config.autoinline)!=="undefined"&&config.autoinline)?true:false;
+		var ignorenamespace=(typeof(config.ignorenamespace)!=="undefined"&&config.ignorenamespace)?true:false;
 		//console.log(aXML);
 		var ret={};
 		var current=ret;
@@ -30,7 +33,11 @@ exports.XML = function(){
 			if (tag.indexOf("?")==0){
 				return "";
 			}
-			tag=tag.replace(":","$");
+			if (ignorenamespace){
+				tag=tag.replace("^.*?:","");
+			} else {
+				tag=tag.replace(":","$");
+			}
 			if (tag.indexOf("/")==0){
 				hierachy.pop();
 				current=hierachy[hierachy.length-1];
@@ -52,18 +59,32 @@ exports.XML = function(){
 					current[tag]={};
 					current=current[tag];
 				}
-				if (typeof(text)!=="undefined"&&text.length>0){
-					//console.log(tag+" "+text);
-					current.$text=text;
-				}
+				var attribnumber=0;
 				attribs.replace(/([^ ]*?)=["'](.*?)["']/g, function(match,attrib,value) {
 					if (attrib.indexOf("xmlns:")==0){
-						addNamespace(current,attrib.substring(6),value);
+						if (!ignorenamespace){
+							addNamespace(current,attrib.substring(6),value);
+						}
 					} else {
-						attrib=attrib.replace(":","$");
+						attribnumber++;
+						if (ignorenamespace){
+							attrib=attrib.replace("^.*?:","");
+						} else {
+							attrib=attrib.replace(":","$");
+						}
 						current[attrib]=value;
 					}
 				});
+				if (typeof(text)!=="undefined"&&text.length>0){
+					text=text.replace(/[\r\n\t ]+/gi," ");
+					if (text!==" "){
+						if (attribnumber==0&&autoinline){
+							hierachy[hierachy.length-1][tag]=text;
+						} else {
+							current.$text=text;
+						}
+					}
+				}				
 				if (attribs.length==0||attribs.lastIndexOf("/")!=attribs.length-1){
 					hierachy[hierachy.length]=current;
 					//console.log("Stack:"+JSON.stringify(current));

@@ -18,6 +18,11 @@
     </div>
     <div class="form-row">
         <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-multithread" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-multithread" style="width: 70%;">Multithreading?</label>
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
         <input type="checkbox" id="node-input-ignorenamespace" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-ignorenamespace" style="width: 70%;">Ignore Namespace?</label>
     </div>
@@ -39,7 +44,8 @@
         defaults: {
             name: {value:""},
             ignorenamespace: {value:false},
-            autoinline: {value:false}
+            autoinline: {value:false},
+			multithread: {value:false}
         },
         color:"BurlyWood",
         inputs:1,

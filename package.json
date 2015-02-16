@@ -3,6 +3,7 @@
     "version"      : "0.0.1",
     "description"  : "Advanced XML Node",
     "dependencies": {
+		"meep-meep-xml":"0.0.1"
     },
 	"repository": {
 		"type": "git",

@@ -29,18 +29,37 @@ module.exports = function(RED) {
 	var multithreadinit=false;
 	var nodes={};
 	var nodeno=0;
+	
+	function Worker(){
+		var worker=cp.fork('./node_modules/node-red-contrib-xml/xmlworker.js');
+		var messages=new Array();
+		var inwork=false;
+		worker.on('message', function(m) {
+			if (messages.length>0){
+				worker.send(messages.pop());
+			} else {
+				inwork=false;
+			}
+			for (var i=0;i<m.buffer.length;i++){
+				nodes[m.number].send({payload:m.buffer[i]});
+			}
+		});
+		this.send=function(msg){
+			if (inwork){
+				messages.push(msg);
+			} else {
+				inwork=true;
+				worker.send(msg);
+			}
+		}
+	}
 	function initMultithread(){
 		if (multithreadinit){
 			return;
 		}
 		multithreadinit=true;
 		for (var i=0;i<cores;i++){
-			var worker=cp.fork('./node_modules/node-red-contrib-xml/xmlworker.js');
-			worker.on('message', function(m) {
-				for (var i=0;i<m.buffer.length;i++){
-					nodes[m.number].send({payload:m.buffer[i]});
-				}
-			});
+			var worker=new Worker();
 			workers.push(worker);
 		}
 	}
